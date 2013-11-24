@@ -1,0 +1,68 @@
+module phl::lang::arrays;
+
+extern GC_malloc;
+extern GC_realloc;
+
+doc @Array on monikäyttöinen array-luokka. Indexit alkavat nollasta;
+doc Löytyy core.phl:stä;
+
+<@T> @Array<@T> Array(@Integer size) [
+	@List<@T> l = @List<@T> GC_malloc($(*$(+size 1)4));
+	$(set l 0 size);
+	@Array<@T> arr = @Array<@T> @Any GC_malloc(sizeof @Array<@T>);
+	$(arr:setData @List<@T> l);
+	return arr;
+]
+
+struct @Link<@T> {
+	field @T d {
+		get: getData,
+		set: setData
+	};
+	field @Link<@T> n {
+		get: getNext,
+		set: setNext
+	};
+
+	new [
+		this.setData(null);
+		this.setNext(null);
+	]
+
+};
+
+struct @Stack<@T> {
+	field @Link<@T> top {
+		get: getTop,
+		set: setTop
+	};
+	field @Integer size {
+		get: size,
+		set: setSize
+	};
+
+	new [
+		this.setTop(null);
+		this.setSize(0);
+	]
+
+	@Void push(@T value) [
+		@Link<@T> l = new @Link<@T>;
+		l.setData(value);
+		l.setNext(this.getTop());
+		this.setTop(l);
+		this.setSize(this.size().inc());
+	]
+
+	@T pop [
+		if ($(this::size :eq 0)) {
+			return @T @Any 0;
+		}
+		@T value = this.getTop().getData();
+		this.setTop(this.getTop().getNext());
+
+		this.setSize(this.size().dec());
+
+		return value;
+	]
+};

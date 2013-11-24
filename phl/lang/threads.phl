@@ -1,0 +1,21 @@
+module phl::lang::threads;
+
+extern fork;
+except @Function<@Integer> fork;
+
+extern exit;
+
+struct @MultithreadingException : @Exception {};
+
+@Boolean runInThread(@Closure<@Void> code) throws ex [
+	@Integer result = fork();
+	if (result == 1::neg) {
+		throw new @MultithreadingException;
+		return false;
+	} else if (result == 0) {
+		return true;
+	} else {
+		code();
+		exit(0);
+	}
+]

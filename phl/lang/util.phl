@@ -1,0 +1,12 @@
+module phl::lang::util;
+
+<@T> @Closure<@T> createFactory [
+	return @Closure<@T> [return @T @Any 0;];
+]
+
+<@A, @B, @C> @Closure<@C, @A> compose(@Closure<@B, @A> a, @Closure<@C, @B> b) [
+	return #(c)[
+		nonlocal a, b;
+		return b(a(c));
+	];
+]

@@ -1,0 +1,94 @@
+module phl::lang::collections;
+
+import phl::lang::arrays;
+
+@Integer hash1(@String t) [
+	var hash = 0;	
+	
+	var len = t::len;
+	for (var i = 0; i < len; i=i+1) {
+		hash = hash + t.charAt(i) * (i+1);
+	}
+	
+	return hash % 100;
+]
+
+@String hash1r(@Integer t) [
+	return "".appendch(100+t);
+]
+
+@Integer hash2(@Object t) [
+	var hash = @Integer @Any t;
+	
+	return hash % 100;
+]
+
+struct @Entry<@T> {
+	field @String key {get:key,set:set_key};
+	field @T value {get:val,set:set_val};
+
+	@Entry<@T> init(@String key, @T val) [
+		this.set_key(key);
+		this.set_val(val);
+		return this;
+	]
+};
+
+extern printf;
+struct @Hashtable<@T> {
+	
+	field @Array<@Array<@Entry<@T> > > table {get:table, set:set_table};
+	
+	new [
+		this.set_table(new @Array<@Array<@Entry<@T> > >.init(100));
+	]
+	
+	#warn(NORMAL)
+	@Void set(@String key, @T val) [
+		var hash = hash1(key);
+		var list = this::table.get(hash);
+		if (null == list) {
+			list = new @Array<@Entry<@T> >;
+			list.add(new @Entry<@T>.init(key, val));
+			
+			this::table.set(hash, list);
+			
+			doc printf("Key %s (%i): saved to a new slot\n", key, hash);
+			return void;
+		} else {
+			list = list.filter(
+				#(entry) [
+					nonlocal key;
+					return entry::key != key;
+				]);
+			list.add(new @Entry<@T>.init(key, val));
+			
+			doc printf("Key %s (%i): saved to an existing slot (size %i)\n", key, hash, list::size);
+			return void;
+		}
+	]
+	
+	@Void operator[]=(@String key, @T val) alias @Hashtable.set;
+	
+	#warn(NORMAL)
+	@T get(@String key) [
+		var list = this::table.get(hash1(key));
+		if (null == list) {
+			doc printf("Key %s (%i): not found! (slot empty)\n", key, hash1(key));
+			return null;
+		} else {
+			for (var i = 0; i < list::size; i=i+1) {
+				if (null !=  list.get(i))
+					if (list.get(i)::key == key) {
+						doc printf("Key %s (%i): found! (position %i, slot size %i)\n", key, hash1(key), i, list::size);
+						return list.get(i)::val;
+					}
+			}
+			doc printf("Key %s (%i): not found! (slot size %i)\n", key, hash1(key), list::size);
+			return null;
+		}
+	]
+	
+	@T operator[](@String key) alias @Hashtable.get;
+	
+};

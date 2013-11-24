@@ -1,0 +1,153 @@
+module phl::lang::io;
+
+/* IO Streams */
+
+doc Input Stream;
+class @IStream {
+	@Integer read abstract;
+};
+
+doc Data Input Stream;
+interface @DIStream data castable @IStream {
+	@Integer read [
+		return (@IStream this)::read;
+	]
+	
+	@String reads [
+		var s = "";
+		var i = (@IStream this)::read;
+		while (i != 0) {
+			s.appendch(i);
+			i = (@IStream this)::read;
+		}
+		return s;
+	]
+	
+	@DIStream operator >> (@Pointer<@String> d) [
+		d := this::reads;
+		return this;
+	]
+};
+
+doc Output Stream;
+class @OStream {
+	@Void write(@Integer d) abstract;
+};
+
+doc Data Output Stream;
+interface @DOStream data castable @OStream {
+	@Void write(@Integer d) [
+		(@OStream this).write(d);
+	]
+	
+	@Void writes(@String d) [
+		var i = d::len;
+		for (var j = 0; j < i; j = j + 1) (@OStream this).write(d.charAt(j));
+		(@OStream this).write(0);
+	]
+	
+	@DOStream operator << (@String d) [
+		this.writes(d);
+		return this;
+	]
+};
+
+extern scanf;
+extern printf;
+
+/* Standard I/O Streams */
+
+class @StdIn : @IStream {
+	@Integer read [
+		var i = 0;
+		scanf("%c", ref(i));
+		return i;
+	]
+};
+
+class @StdOut : @OStream {
+	@Void write(@Integer d) [
+		printf("%c", d);
+	]
+};
+
+interface @StdIO {
+	@DIStream in [
+		return stdin;
+	]
+	@DOStream out [
+		return stdout;
+	]
+	@String endl [
+		return "\n";
+	]
+};
+static @StdIO StdIO;
+
+static @DIStream stdin;
+static @DOStream stdout;
+
+/* StdIO Initialization */
+
+#private @Void initStdIO [
+	stdin = new @StdIn;
+	stdout = new @StdOut;
+]
+
+/* Standard IO functions */
+
+@Void print(@String s) [
+	printf("%s", s);
+]
+
+@Void println(@String s) [
+	printf("%s\n", s);
+]
+
+
+/* file-functions */
+
+extern fscanf;
+extern fprintf;
+extern fflush;
+extern fclose;
+extern free;
+
+doc File;
+
+interface @File {
+	@Any scan(@String f, _data) [
+		fscanf(this, f, _data);
+		return _data;
+	]
+	@Void print(@String f, d) alias fprintf;
+	
+	@Integer read [
+		@Pointer<@Integer> p = alloc(ptr_size());
+		fscanf(this, "%c", p);
+		return p.get();
+	]
+	@Void write(@Integer d) [
+		fprintf(this, "%c", d & 0xFF);
+	]
+	
+	@Void flush alias fflush;
+	@Void close alias fclose;
+};
+
+extern fopen;
+
+struct @IOException : @Exception {};
+
+#warn(NORMAL)
+@File openFile(@String file, @String flags) throws ex [
+	@File f = @File fopen(file, flags);
+	if (isNull(f)) throw new @IOException;
+	return f;
+]
+
+/* I/O Initialization */
+
+module.onload [
+	initStdIO();
+]
