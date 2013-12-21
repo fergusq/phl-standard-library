@@ -58,11 +58,12 @@ struct @Hashtable<@T> {
 		} else {
 			list = list.filter(
 				#(entry) [
-					nonlocal key;
-					return entry::key != key;
+					return entry::key != $key;
 				]);
 			list.add(new @Entry<@T>.init(key, val));
 			
+			this::table.set(hash, list);
+
 			doc printf("Key %s (%i): saved to an existing slot (size %i)\n", key, hash, list::size);
 			return void;
 		}
