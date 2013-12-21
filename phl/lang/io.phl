@@ -5,6 +5,7 @@ module phl::lang::io;
 doc Input Stream;
 class @IStream {
 	@Integer read abstract;
+	@Integer scanf(@String f, d) abstract;
 };
 
 doc Data Input Stream;
@@ -32,6 +33,7 @@ interface @DIStream data castable @IStream {
 doc Output Stream;
 class @OStream {
 	@Void write(@Integer d) abstract;
+	@Void printf(@String f, d) abstract;
 };
 
 doc Data Output Stream;
@@ -63,11 +65,19 @@ class @StdIn : @IStream {
 		scanf("%c", ref(i));
 		return i;
 	]
+	
+	@Integer scanf(@String f, d) [
+		return @Integer scanf(f, d);
+	]
 };
 
 class @StdOut : @OStream {
 	@Void write(@Integer d) [
 		printf("%c", d);
+	]
+	
+	@Void printf(@String f, d) [
+		printf(f, d);
 	]
 };
 
@@ -116,11 +126,8 @@ extern free;
 doc File;
 
 interface @File {
-	@Any scan(@String f, _data) [
-		fscanf(this, f, _data);
-		return _data;
-	]
-	@Void print(@String f, d) alias fprintf;
+	scanf(@String f, _data) alias fscanf;
+	printf(@String f, d) alias fprintf;
 	
 	@Integer read [
 		@Pointer<@Integer> p = alloc(ptr_size());
@@ -133,6 +140,36 @@ interface @File {
 	
 	@Void flush alias fflush;
 	@Void close alias fclose;
+};
+
+class @FIStream : @IStream {
+	field @File file;
+	@FIStream init(@File f) [
+		this::file = f;
+	]
+
+	@Integer read [
+		return file().read();
+	]
+	
+	@Integer scanf(@String f, d) [
+		return @Integer file().scanf(f, d);
+	]
+};
+
+class @FOStream : @OStream {
+	field @File file;
+	@FOStream init(@File f) [
+		this::file = f;
+	]
+
+	@Void write(@Integer d) [
+		return file().write(d);
+	]
+	
+	@Void printf(@String f, d) [
+		file().printf(f, d);
+	]
 };
 
 extern fopen;
