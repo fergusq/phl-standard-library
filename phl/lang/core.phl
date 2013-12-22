@@ -69,8 +69,8 @@ except @Function<@Void, @String> err_println;
 ]
 
 interface @Null {
-	@Boolean operator==(@Object obj) alias ==;
-	@Boolean operator!=(@Object obj) alias !=;
+	@Boolean operator==(@Any obj) alias ==;
+	@Boolean operator!=(@Any obj) alias !=;
 };
 
 struct @Object : @Any {
@@ -244,7 +244,7 @@ struct @Array<@T> {
 		$(set l 0 $(+oldsize array::size));
 		$(this:setData @List<@T> l);
 		for (var i = 0; i < array::size; i=i+1) {
-			this.set((oldsize+i), (array.get(i)));
+			this[oldsize+i] = array.get(i);
 		}
 		return this;
 	]
@@ -279,7 +279,7 @@ struct @Array<@T> {
 	@see Array.set")
 	#modifies_this
 	@Void insert(@Integer index, @T data_) [
-		
+		index = index + 1;
 		@Integer oldsize = this::size;
 		@List<@Any> l = @List<@Any> GC_realloc(this::list, ((oldsize+2) * ptr_size()));
 		$(set l 0 $(+oldsize 1));
@@ -293,6 +293,35 @@ struct @Array<@T> {
 			}
 		}
 		l[index] = data_;
+		
+		$(this:setData @List<@T> l);
+	]
+	
+	#info("Insert a group of elements to the array and shift all elements. Elements are not removed from the array as in Array.set.
+	@param index the index
+	@param array the group of elements
+	@see Array.add
+	@see Array.set
+	@see Array.insert")
+	#modifies_this
+	@Void insertAll(@Integer index, @T[] array) [
+		index = index + 1;
+		@Integer oldsize = this::size;
+		@Integer arrsize = array::size;
+		@List<@Any> l = @List<@Any> GC_realloc(this::list, ((oldsize+1+arrsize) * ptr_size()));
+		$(set l 0 $(+oldsize arrsize));
+		
+		{
+			@Integer i = oldsize+arrsize;
+			while (i > index) {
+				l[i] = l[i-arrsize];
+				
+				i = i::dec;
+			}
+		}
+		for (var i = 0; i < arrsize; i=i+1) {
+			l[index+i] = array[i];
+		}
 		
 		$(this:setData @List<@T> l);
 	]
