@@ -452,11 +452,12 @@ struct @Array<@T> {
 		return new @Enumerator<@T>.init(this);
 	]
 	
-	#info("Searches a value from the array @param val the value @returns <tt>true</tt> if the array contains the value, otherwise <tt>false</tt>")
-	@Boolean contains(@T val) [
+	#info("Searches a value from the array @param val the value @returns <tt>true</tt> if the array contains the value, otherwise <tt>false</tt>. Uses <tt>operator ==</tt> to compare elements")
+	template @Boolean contains(@T val) [
 		@Integer i = 0;
-		while (i < this::size) {
-			if (equals(this.get(i), val)) return true;
+		var size = this::size;
+		while (i < size) {
+			if (this[i] == val) return true;
 			i = i::inc;
 		}
 		return false;
