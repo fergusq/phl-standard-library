@@ -56,8 +56,11 @@ Inline If
 
 extern exit;
 
-extern err_println;
-except @Function<@Void, @String> err_println;
+extern fprintf;
+extern stderr;
+@Void err_println(@String a) [
+	fprintf(stderr, "%s\n", a);
+]
 
 #info("Prints a warning if an object is null @param obj the object")
 @Void nullPtrCheck(@Object obj) [
