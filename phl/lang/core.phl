@@ -225,6 +225,11 @@ struct @Array<@T> {
 		$(this::list:set $(+index 1) value);
 	]
 
+	#info("Returns the last element of the array @returns what above says")
+	@T last [
+		return this.get(size()-1);
+	]
+
 	#info("Add a new element to the end of the array @param value value @returns this @see Array.addAll @see Array.insert")
 	#modifies_this
 	@Array<@T> add(@T value) [
