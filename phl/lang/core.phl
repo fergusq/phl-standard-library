@@ -58,8 +58,8 @@ extern exit;
 
 extern fprintf;
 extern stderr;
-@Void err_println(@String a) [
-	fprintf(stderr, "%s\n", a);
+@Void err_println(@String str) [
+	fprintf(stderr, "%s\n", str);
 ]
 
 #info("Prints a warning if an object is null @param obj the object")
@@ -257,9 +257,11 @@ struct @Array<@T> {
 		return this;
 	]
 
-	#info("Remove an element from the array and shift all elements after removed element. @param index the index of the element @returns the element")
+	#info("Remove an element from the array and shift all elements after removed element. @param index the index of the element; negative index is subtracted from the size @returns the element")
 	#modifies_this
 	@T remove(@Integer index) [
+		
+		if (index < 0) index = this::size + index;
 		
 		@T a = this::list[index+1];
 		
@@ -281,12 +283,15 @@ struct @Array<@T> {
 	]
 	
 	#info("Insert an element to the array and shift all elements. Elements are not removed from the array as in Array.set.
-	@param index the index
+	@param index the index; negative index is subtracted from the size
 	@param data_ the element
 	@see Array.add
 	@see Array.set")
 	#modifies_this
 	@Void insert(@Integer index, @T data_) [
+		
+		if (index < 0) index = this::size + index;
+		
 		index = index + 1;
 		@Integer oldsize = this::size;
 		@List<@Any> l = @List<@Any> GC_realloc(this::list, ((oldsize+2) * ptr_size()));
@@ -306,13 +311,15 @@ struct @Array<@T> {
 	]
 	
 	#info("Insert a group of elements to the array and shift all elements. Elements are not removed from the array as in Array.set.
-	@param index the index
+	@param index the index; negative index is subtracted from the size
 	@param array the group of elements
 	@see Array.add
 	@see Array.set
 	@see Array.insert")
 	#modifies_this
 	@Void insertAll(@Integer index, @T[] array) [
+		if (index < 0) index = this::size + index;
+		
 		index = index + 1;
 		@Integer oldsize = this::size;
 		@Integer arrsize = array::size;
