@@ -988,17 +988,6 @@ except @Function<@Any, @List<@Any> >			deref;
 except @Function<@Integer>				ptr_size;
 
 PIL "
-ifLess4(a, b, f, x, y, z, w):
-	if ge a b goto out 
-		proceed f(x, y, z, w)
-	out: ret
-
-if(c, f):
-	if e c 0 goto out
-		_f0 = get(f, 0)
-		proceed _f0(f)
-	out: ret
-
 argreg lib@eq(a, b):
 	if e a b goto true
 		return 0
