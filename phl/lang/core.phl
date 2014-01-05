@@ -578,6 +578,14 @@ interface @String data @Pointer {
 		return @String a;
 	]
 	
+	#warn(CRITICAL_ONLY)
+	@String copy() [
+		@Integer len = strlen(this);
+		@String a = @String @Any alloc(len);
+		strcpy(a, this);
+		return @String a;
+	]
+	
 	#info("Creates a new string and appends a char the end of that string @param ch the char @returns the new string")
 	#warn(CRITICAL_ONLY)
 	@String appendch(@Integer ch) [
@@ -943,6 +951,14 @@ interface @Pointer<@T> data @Integer {
 	@T set (@T value) #modifies_this alias __at2__;
 	
 	@T operator:=(@T v) #modifies_this alias @Pointer.set;
+	
+	@T operator[](@Integer i) [
+		return (@Pointer<@T> (@Integer this) + i).get();
+	]
+	@T operator[]=(@Integer i, @T v) #modifies_this [
+		(@Pointer<@T> (@Integer this) + i).set(v);
+		return v;
+	]
 };
 
 #info("Allocates memory @param size the size in bytes @returns a pointer to the allocated memory")
