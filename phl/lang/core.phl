@@ -953,7 +953,7 @@ interface @Pointer<@T> data @Integer {
 	@T operator:=(@T v) #modifies_this alias @Pointer.set;
 	
 	@T operator[](@Integer i) [
-		return (@Pointer<@T> (@Integer this) + i).get();
+		return (@Pointer<@T> (@Integer this) + i*ptr_size()).get();
 	]
 	@T operator[]=(@Integer i, @T v) #modifies_this [
 		(@Pointer<@T> (@Integer this) + i).set(v);
