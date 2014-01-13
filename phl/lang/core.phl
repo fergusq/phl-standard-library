@@ -952,13 +952,8 @@ interface @Pointer<@T> data @Integer {
 	
 	@T operator:=(@T v) #modifies_this alias @Pointer.set;
 	
-	@T operator[](@Integer i) [
-		return (@Pointer<@T> (@Integer this) + i*ptr_size()).get();
-	]
-	@T operator[]=(@Integer i, @T v) #modifies_this [
-		(@Pointer<@T> (@Integer this) + i).set(v);
-		return v;
-	]
+	@T operator[](@Integer i) alias get;
+	@T operator[]=(@Integer i, @T v) #modifies_this alias set;
 };
 
 #info("Allocates memory @param size the size in bytes @returns a pointer to the allocated memory")
