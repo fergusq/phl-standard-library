@@ -356,6 +356,9 @@ struct @Array<@T> {
 	#info("Creates a new array and applies an operation to all elements (same as map) @param operation the operation @returns the new array")
 	@Array<@T> collect(@Closure<@T, @T> operation) alias array_collect_;
 	
+	#info("Reduces the array @param initval initial value @param operation the operation @returns the new value")
+	@T inject(@T initval, @Closure<@T, @T, @T> operation) alias array_inject_;
+	
 	#info("Sorts the array @see Array.bsort")
 	#modifies_this
 	#deprecated("Does not work!")
@@ -534,6 +537,17 @@ struct @Array<@T> {
 		i = i::inc;
 	}
 	return arr;
+]
+
+<@T, @U> @T array_inject_(@Array<@U> t, @T initval, @Closure<@T, @T, @U> operation) [
+	@T val = initval;
+
+	@Integer i = 0;
+	while (i < t::size) {
+		val = $(operation val $(t:get i));
+		i = i::inc;
+	}
+	return val;
 ]
 
 interface @Array2<@T> data castable @Array<@Array<@T> > {
