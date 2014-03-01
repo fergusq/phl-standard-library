@@ -353,6 +353,9 @@ struct @Array<@T> {
 		return filtered;
 	]
 	
+	#info("Creates a new array and applies an operation to all elements @param operation the operation @returns the new array")
+	@Array<@T> collect(@Closure<@T, @T> operation) alias array_collect_;
+	
 	#info("Sorts the array @see Array.bsort")
 	#modifies_this
 	#deprecated("Does not work!")
@@ -521,6 +524,17 @@ struct @Array<@T> {
 		return @List @Any this.list();
 	]
 };
+
+<@T, @U> @Array<@T> array_collect_(@Array<@U> t, @Closure<@T, @U> operation) [
+	@Array<@T> arr = new @Array<@T>;
+
+	@Integer i = 0;
+	while (i < t::size) {
+		$(arr:add $(operation $(t:get i)));
+		i = i::inc;
+	}
+	return arr;
+]
 
 interface @Array2<@T> data castable @Array<@Array<@T> > {
 	@T get(@Integer x, @Integer y) [
