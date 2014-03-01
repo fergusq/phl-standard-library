@@ -353,7 +353,7 @@ struct @Array<@T> {
 		return filtered;
 	]
 	
-	#info("Creates a new array and applies an operation to all elements (same as map) @param operation the operation @returns the new array")
+	#info("Creates a new array and applies an operation to all elements (also called map) @param operation the operation @returns the new array")
 	@Array<@T> collect(@Closure<@T, @T> operation) alias array_collect_;
 	
 	#info("Reduces the array @param initval initial value @param operation the operation @returns the new value")
