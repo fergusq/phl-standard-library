@@ -354,10 +354,10 @@ struct @Array<@T> {
 	]
 	
 	#info("Creates a new array and applies an operation to all elements (also called map) @param operation the operation @returns the new array")
-	@Array<@T> collect(@Closure<@T, @T> operation) alias array_collect_;
+	<@U> @Array<@U> collect(@Closure<@U, @T> operation) alias array_collect_;
 	
 	#info("Reduces the array @param initval initial value @param operation the operation @returns the new value")
-	@T inject(@T initval, @Closure<@T, @T, @T> operation) alias array_inject_;
+	<@U> @U inject(@U initval, @Closure<@U, @U, @T> operation) alias array_inject_;
 	
 	#info("Sorts the array @see Array.bsort")
 	#modifies_this
