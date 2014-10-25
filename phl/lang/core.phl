@@ -978,7 +978,10 @@ interface @Pointer<@T> data @Integer {
 	#warn(CRITICAL_ONLY)
 	@T set (@T value) #modifies_this alias __at2__;
 	
-	@T operator:=(@T v) #modifies_this alias @Pointer.set;
+	#deprecated("Use ~=") @T operator:=(@T v) #modifies_this alias @Pointer.set;
+	
+	@T operator~=(@T v) #modifies_this alias @Pointer.set;
+	@T operator~() alias @Pointer.get;
 	
 	@T operator[](@Integer i) alias get;
 	@T operator[]=(@Integer i, @T v) #modifies_this alias set;
