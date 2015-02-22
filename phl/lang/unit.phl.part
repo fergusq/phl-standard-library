@@ -2,41 +2,75 @@
 
 /**** UNIT TEST FUNCTIONS ****/
 
+/** External functions **/
+
+extern printf;
+
 /** Static variables **/
 
 static @Boolean failed;
 static @String[] results;
 
-/** AssertionException structure **/
-struct @AssertionException : @Exception {};
-
 #info("Assert
 	@param cond the condition
 	@param desc the description of the test
-	@throws AssertionException if the assrt fails
 	@see assertFalse")
-@Void assert(@Boolean cond, @String desc) throws ex [
-	if (cond) {
+@Void assert(@Boolean cond, @String desc) [
+	if (cond::not) {
+		/*printf("Assert failed: %s\n", desc);*/
+		
 		failed = true;
 		
 		var report = "Assert failed: " + desc;
-		
+
+		if (null == results) results = new @String[];
 		results.add(report);
-		throw new @AssertionException.initException(report);
 	}
 ]
 
-@Void assertFalse(@Boolean cond, @String desc) throws ex [
+@Void assertFalse(@Boolean cond, @String desc) [
 	assert(cond::not, desc);
 ]
 
 #unittest #loadLast module.finishTesting [
 	if (failed) {
-		err_println("== Some unit tests failed == ");
+		printf("== Some unit tests failed == \n");
 		for (var i = 0; i < results::size; i = i + 1) {
-			err_println(results[i]);
+			printf("%s\n", results[i]);
 		}
 	}
+]
+
+/*** Unit tests ***/
+
+#unittest module.testAssertFail [
+	var fail = failed;
+	
+	assert(false, "testing assert function: fail");
+	
+	var newfail = failed;
+	failed = fail;
+	
+	results.remove(results::size-1);
+	
+	assert(newfail, "testAssertFail");
+]
+
+#unittest module.testAssertResults [
+	var resultsSize = results::size;
+	var fail = failed;
+	
+	assert(false, "testing assert function: results");
+	
+	failed = fail;
+	
+	var newResultsSize = results::size;
+	var lastResult = results[results::size-1];
+	
+	results.remove(results::size-1);
+	
+	assert(newResultsSize == resultsSize+1, "testAssertResults: size");
+	assert(lastResult == "Assert failed: testing assert function: results", "testAssertResults: result");
 ]
 
 !endif

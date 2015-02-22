@@ -154,16 +154,41 @@ interface @String data @Pointer {
 	@Integer operator [] (@Integer index) alias @String.charAt;
 };
 
+!ifdef UNIT_TESTS
+
 /*** String unit tests ***/
 
-#unittest module.testSplit [
-	try {
-		@String text = "a;b;cdef";
-		@String[] splittedString = text.split(';');
-		assert(splittedString[0] == "a"
-			&& splittedString[1] == "b"
-			&& splittedString[2] == "cdef" 
-			&& splittedString::size == 3, "Splitted string does not equal to {a,b,cdef}.");
-	} catch (ex);
+#unittest module.testStringEquals [
+	@String a = "aberiquerum a";
+	@String b = "aberiquerun b";
+	
+	assertFalse(a == b, "testStringEquals: a == b");
+	assert(a != b, "testStringEquals: a != b");
+	assert(b == "aberiquerun b", "testStringEquals: b == constant");
 ]
 
+#unittest module.testStringAppend [
+	@String text = "ab";
+	@String ans = text + "ba";
+	assert(ans == "abba", "testStringAppend");
+]
+
+#unittest module.testStringCharAt [
+	@String text = "abbacadabbaraba";
+	assert(text[0] == 'a', "testStringCharAt: 0");
+	assert(text[1] == 'b', "testStringCharAt: 1");
+	assert(text[4] == 'c', "testStringCharAt: 4");
+	assert(text[6] == 'd', "testStringCharAt: 6");
+	assert(text[11] == 'r', "testStringCharAt: 11");
+]
+
+#unittest module.testStringSplit [
+	@String text = "a;b;cdef";
+	@String[] splittedString = text.split(';');
+	assert(splittedString[0] == "a"
+		&& splittedString[1] == "b"
+		&& splittedString[2] == "cdef"
+		&& splittedString::size == 3, "testStringSplit");
+]
+
+!endif
