@@ -1,0 +1,18 @@
+
+/**** EXCEPTION STRUCTURE ****/
+
+struct @Exception {	
+	field @String message {
+		get:getMessage,
+		set:setMessage
+	};
+	
+	@Exception initException(@String message) [
+		this.setMessage(message);
+		return this;
+	]
+};
+
+!ifdef TARGET_C
+PIL "*/void*reg_obx;void*reg_ocx;/*";
+!endif

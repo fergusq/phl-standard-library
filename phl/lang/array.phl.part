@@ -1,0 +1,541 @@
+
+/**** ADVANCED COLLECTIONS ****/
+
+/** Enumerator structure **/
+
+struct @Enumerator<@T> {
+	field @T[] items;
+	
+	#info("Initializes a new enumerator
+		@param items emumerated items
+		@returns this
+		@since PHL 1.2.5")
+	@Enumerator<@T> init(@T[] items) [
+		this::items = items;
+		return this;
+	]
+	
+	#info("Enumerates over the items
+		@param task calls task for each item
+		@since PHL 1.2.5")
+	@Void operator each(@Closure<@IteratorControl, @T> task) [
+		@Integer i = 0;
+		while (i < this::items::size) {
+			if (task(this::items[i]).isBreak()) break;
+			i = i::inc;
+		}
+	]
+	
+	#info("Enumerates over the items
+		@param job calls task for each item and index
+		@since PHL 1.2.5")
+	@Void operator enumerate (@Closure<@IteratorControl, @Integer, @T> job) [
+		for (var i = 0; i < this::items::size; i=i+1) if(job(i, this::items[i]).isBreak()) break;
+	]
+};
+
+/** IteratorControl interface **/
+
+interface @IteratorControl data @Integer {
+	#info("Is continue?
+		@returns <tt>true</tt> if equal to the CONTINUE constant
+		@see CONTINUE
+		@since PHL 1.2.5")
+	@Boolean isContinue [
+		return 0 == @Integer this;
+	]
+	#info("Is break?
+		@returns <tt>true</tt> if equal to the BREAK constant
+		@see BREAK
+		@since PHL 1.2.5")
+	@Boolean isBreak [
+		return 1 == @Integer this;
+	]
+};
+
+/** IteratorControl constants **/
+
+#info("Continue an iteration/enumeration
+	@returns the CONTINUE constant
+	@see BREAK
+	@see IteratorControl.isContinue
+	@since PHL 1.2.5")
+@IteratorControl CONTINUE [
+	return @IteratorControl 0;
+]
+
+#info("Stop an iteration/enumeration
+	@returns the BREAK constant
+	@see CONTINUE
+	@see IteratorControl.isBreak
+	@since PHL 1.2.5")
+@IteratorControl BREAK [
+	return @IteratorControl 1;
+]
+
+/** KeyValueStream class **/
+/*
+class @KeyValueStream<@K, @V> {
+	@KeyValueStream<@K, @V> filter(@Closure<@Boolean, @K, @V> condition) abstract;
+	@KeyValueStream<@K, @V> map(@Closure<@V, @K, @V> mapFunction) abstract;
+	
+	@V vmax() abstract;
+	@K kmax() abstract;
+	@V vmaxc(@Closure<@Boolean, @V, @V> comparator) abstract;
+	@K kmaxc(@Closure<@Boolean, @V, @V> comparator) abstract;
+	
+	@V vmin() abstract;
+	@K kmin() abstract;
+	@V vminc(@Closure<@Boolean, @V, @V> comparator) abstract;
+	@K kminc(@Closure<@Boolean, @V, @V> comparator) abstract;
+};
+
+class @ArrayKeyValueStream<@T> : @KeyValueStream<@Integer, @T> {
+	
+	field @T[] array;
+	
+	@ArrayKeyValueStream<@T> initAKVS(@T[] array) [
+		this::array = array;
+	]
+	
+	@KeyValueStream<@K, @V> filter(@Closure<@Boolean, @K, @V> condition) abstract;
+	@KeyValueStream<@K, @V> map(@Closure<@V, @K, @V> mapFunction) abstract;
+	
+	@V vmax() abstract;
+	@K kmax() abstract;
+	@V vmaxc(@Closure<@Boolean, @V, @V> comparator) abstract;
+	@K kmaxc(@Closure<@Boolean, @V, @V> comparator) abstract;
+	
+	@V vmin() abstract;
+	@K kmin() abstract;
+	@V vminc(@Closure<@Boolean, @V, @V> comparator) abstract;
+	@K kminc(@Closure<@Boolean, @V, @V> comparator) abstract;
+};
+*/
+/** Array structure **/
+
+struct @Array<@T> {
+
+	/** Fields **/
+
+	field @List<@T> _data {
+		get: list,
+		set: setData
+	};
+
+	/** Initialization **/
+
+	new [
+		@List<@Any> l = @List<@Any> GC_malloc(ptr_size());
+		$(l:set 0 0);
+		$(this:setData @List<@T> l);
+	]
+	
+	#info("Allocates memory for the array. Faster than Array.init, but deletes the existing array. Use this when initing the array first time.
+		@param size the size of the arry
+		@returns this")
+	#warn(NORMAL)
+	#modifies_this
+	@Array<@T> alloc(@Integer size) [
+		@List<@Any> l = @List<@Any> GC_malloc(ptr_size()+ptr_size()*size);
+		$(l:set 0 size);
+		$(this:setData @List<@T> l);
+		return this;
+	]
+	
+	#info("If the array is smaller than a specific size, adds more space to the array
+		@param size the size
+		@returns this")
+	#warn(NORMAL)
+	#modifies_this
+	@Array<@T> init(@Integer size) [
+	
+		size = $(-size this::size);
+	
+		@Integer i = 0;
+		while ($(<i size)) {
+			this.add(null);
+		
+			i = $(+i 1);
+		}
+		return this;
+	]
+
+	/** Size **/
+
+	#info("The size of the array
+		@returns the size of the array")
+	@Integer size [
+		return @Integer $(get this::list 0);
+	]
+	
+	/** Get **/
+	
+	#info("Get an element from the array with bounds checking.
+		@param index the index of the element
+		@returns the element")
+	#warn(NORMAL)
+	@T get(@Integer index) [
+		index = $(+index 1);
+		if ($(<=index 0)) return null;
+		if ($(>index this::size)) return null;
+		return $(this::list:get index);
+	]
+	
+	#info("Get an element from the array - no bounds checking.
+		@param index the index of the element
+		@returns the element")
+	@T operator [] (@Integer index) [
+		return $(this::list:get $(+index 1));
+	]
+	
+	/** Set **/
+	
+	#info("Put an element to the array with bounds checking
+		@param index the index of the element
+		@param value the element")
+	#modifies_this
+	@Void set(@Integer index, @T value) [
+		index = $(+index 1);
+		if ($(<=index 0)) return void;
+		if ($(>index this::size)) return void;
+		$(this::list:set index value);
+	]
+	
+	#info("Put an element to the array - no bounds checking
+		@param index the index of the element
+		@param value the element")
+	#modifies_this
+	@Void operator []= (@Integer index, @T value) [
+		$(this::list:set $(+index 1) value);
+	]
+
+	/** Last **/
+
+	#info("Returns the last element of the array
+		@returns what above says")
+	@T last [
+		return this.get(size()-1);
+	]
+
+	/** Add and addAll **/
+
+	#info("Add a new element to the end of the array
+		@param value value
+		@returns this
+		@see Array.addAll
+		@see Array.insert")
+	#modifies_this
+	@Array<@T> add(@T value) [
+		@Integer oldsize = this::size;
+		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize + 2) * ptr_size()));
+		$(set l 0 $(+oldsize 1));
+		$(this:setData @List<@T> l);
+		$(this:set oldsize value);
+		return this;
+	]
+	
+	#info("Add all elements of an array to the array
+		@param array the array
+		@returns this")
+	#modifies_this
+	@Array<@T> addAll(@Array<@T> array) [
+		@Integer oldsize = this::size;
+		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize + 1 + array::size) * ptr_size()));
+		$(set l 0 $(+oldsize array::size));
+		$(this:setData @List<@T> l);
+		for (var i = 0; i < array::size; i=i+1) {
+			this[oldsize+i] = array.get(i);
+		}
+		return this;
+	]
+	
+	/** Remove **/
+
+	#info("Remove an element from the array and shift all elements after removed element.
+		@param index the index of the element; negative index is subtracted from the size
+		@returns the element")
+	#modifies_this
+	@T remove(@Integer index) [
+		
+		if (index < 0) index = this::size + index;
+		
+		@T a = this::list[index+1];
+		
+		@Integer oldsize = this::size;
+		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize+1) * ptr_size()));
+		$(set l 0 $(-oldsize 1));
+		
+		{
+			@Integer i = index+1;
+			while (i <= oldsize) {
+				l[i] = l[i+1];
+			
+				i = i::inc;
+			}
+		}
+		$(this:setData @List<@T> l);
+		
+		return a;
+	]
+	
+	/* Insert and insertAll */
+	
+	#info("Insert an element to the array and shift all elements. Elements are not removed from the array as in Array.set.
+		@param index the index; negative index is subtracted from the size
+		@param data_ the element
+		@see Array.add
+		@see Array.set")
+	#modifies_this
+	@Void insert(@Integer index, @T data_) [
+		
+		if (index < 0) index = this::size + index;
+		
+		index = index + 1;
+		@Integer oldsize = this::size;
+		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize+2) * ptr_size()));
+		$(set l 0 $(+oldsize 1));
+		
+		{
+			@Integer i = oldsize+1;
+			while (i > index) {
+				l[i] = l[i-1];
+			
+				i = i::dec;
+			}
+		}
+		l[index] = data_;
+		
+		$(this:setData @List<@T> l);
+	]
+	
+	#info("Insert a group of elements to the array and shift all elements. Elements are not removed from the array as in Array.set.
+		@param index the index; negative index is subtracted from the size
+		@param array the group of elements
+		@see Array.add
+		@see Array.set
+		@see Array.insert")
+	#modifies_this
+	@Void insertAll(@Integer index, @T[] array) [
+		if (index < 0) index = this::size + index;
+		
+		index = index + 1;
+		@Integer oldsize = this::size;
+		@Integer arrsize = array::size;
+		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize+1+arrsize) * ptr_size()));
+		$(set l 0 $(+oldsize arrsize));
+		
+		{
+			@Integer i = oldsize+arrsize;
+			while (i > index) {
+				l[i] = l[i-arrsize];
+				
+				i = i::dec;
+			}
+		}
+		for (var i = 0; i < arrsize; i=i+1) {
+			l[index+i] = array[i];
+		}
+		
+		$(this:setData @List<@T> l);
+	]
+	
+	/* Filter */
+	
+	#info("Create a new array which contains all elements that apply to a specific condition.
+		@param filter the filter
+		@returns the new array")
+	@Array<@T> filter(@Closure<@Boolean, @T> filter) [
+		@Array<@T> filtered = new @Array<@T>;
+
+		@Integer i = 0;
+		while (i < this::size) {
+			if (filter($(this:get i))) $(filtered:add $(this:get i));
+			i = i::inc;
+		}
+		return filtered;
+	]
+	
+	/* Collect and inject */
+	
+	#info("Creates a new array and applies an operation to all elements (also called map)
+		@param operation the operation
+		@returns the new array")
+	<@U> @Array<@U> collect(@Closure<@U, @T> operation) alias array_collect_;
+	
+	#info("Reduces the array
+		@param initval initial value
+		@param operation the operation
+		@returns the new value")
+	<@U> @U inject(@U initval, @Closure<@U, @U, @T> operation) alias array_inject_;
+	
+	/* Sort */
+	
+	#info("Sorts the array -- use this when you want to sort an integer array
+		@see Array.bsort
+		@see Array.bsortc")
+	#modifies_this
+	template @Array<@T> sort [
+		return this.bsort();
+	]
+	
+	#info("Sorts the array using <tt>operator <</tt> as comparator
+		@see Array.bsortc
+		@see Array.sort")
+	#modifies_this
+	#warn(CRITICAL_ONLY)
+	template @Array<@T> bsort [
+		var n = @Integer @Any this::list[0];
+		do {
+		var newn = 0;
+			for (var i = 1; i <= n-1; i=i+1) {
+				if (this::list[i+1] < this::list[i]) {
+					var tmp = this::list[i];
+					this::list[i] = this::list[i+1];
+					this::list[i+1] = tmp;
+					newn = i;
+				}
+			}
+			n = newn;
+		} while (n != 0);
+		return this;
+	]
+	
+	#info("Sorts the array with a comparator
+		@param comparator returns a negative number if the first parameter comes before the second parameter, 0 if they are equal and otherwise a positive number
+		@see Array.bsort
+		@see Array.sort")
+	#modifies_this
+	#warn(CRITICAL_ONLY)
+	@Array<@T> bsortc(@Closure<@Integer, @T, @T> comparator) [
+		var n = @Integer @Any this::list[0];
+		do {
+			var newn = 0;
+			for (var i = 1; i <= n-1; i=i+1) {
+				if (comparator(this::list[i], this::list[i+1]) > 0) {
+					var tmp = this::list[i];
+					this::list[i] = this::list[i+1];
+					this::list[i+1] = tmp;
+					newn = i;
+				}
+			}
+			n = newn;
+		} while (n != 0);
+		return this;
+	]
+	
+	/** Loop methods **/
+	
+	@Void forEach(@Closure<@IteratorControl, @T> task) [
+		@Integer i = 0;
+		while (i < this::size) {
+			if (task(this.get(i)).isBreak()) break;
+			i = i::inc;
+		}
+	]
+	
+	@Void operator each(@Closure<@IteratorControl, @T> task) [
+		@Integer i = 0;
+		while (i < this::size) {
+			if (task(this.get(i)).isBreak()) break;
+			i = i::inc;
+		}
+	]
+	
+	@Void iterate (@Closure<@IteratorControl, @Integer, @T> job) [
+		for (var i = 0; i < this::size; i=i+1) if(job(i, this[i]).isBreak()) break;
+	]
+	@Void operator iterate (@Closure<@IteratorControl, @Integer, @T> job) [
+		for (var i = 0; i < this::size; i=i+1) if(job(i, this[i]).isBreak()) break;
+	]
+	
+	@Enumerator<@T> enumerator [
+		return new @Enumerator<@T>.init(this);
+	]
+	
+	/** Contains **/
+	
+	#info("Searches for a value from the array
+		@param val the value
+		@returns <tt>true</tt> if the array contains the value, otherwise <tt>false</tt>. Uses <tt>operator ==</tt> to compare elements")
+	template @Boolean contains(@T val) [
+		@Integer i = 0;
+		var size = this::size;
+		while (i < size) {
+			if (this[i] == val) return true;
+			i = i::inc;
+		}
+		return false;
+	]
+	
+	/** Operator .. **/
+	
+	#info("Creates a new array which contains all elements of the current array and a new element
+		@param value the new element
+		@returns the new array")
+	@Array<@T> operator..(@T value) [
+		@Array<@T> arr = new @Array<@T>.init(this::size+1);
+
+		@Integer i = 0;
+		while (i < this::size) {
+			arr.set(i, this.get(i));
+			i = i::inc;
+		}
+		arr.set(i, value);
+		return arr;
+	]
+	
+	/** Type conversions **/
+	
+	template @String str [
+		
+		@String s = "[";
+	
+		@Integer i = 0;
+		while (i < this::size) {
+			if (i!=0) s = s + ", ";
+			s = s + (@String this.get(i));
+			i = i::inc;
+		}
+		return s + "]";
+	]
+	
+	template auto @String [
+		
+		@String s = "[";
+	
+		@Integer i = 0;
+		while (i < this::size) {
+			if (i!=0) s = s + ", ";
+			s = s + (@String this.get(i));
+			i = i::inc;
+		}
+		return s + "]";
+	]
+	
+	auto @List #warn(CRITICAL_ONLY) [
+		return @List @Any this.list();
+	]
+};
+
+<@T, @U> @Array<@T> array_collect_(@Array<@U> t, @Closure<@T, @U> operation) [
+	@Array<@T> arr = new @Array<@T>;
+
+	@Integer i = 0;
+	while (i < t::size) {
+		$(arr:add $(operation $(t:get i)));
+		i = i::inc;
+	}
+	return arr;
+]
+
+<@T, @U> @T array_inject_(@Array<@U> t, @T initval, @Closure<@T, @T, @U> operation) [
+	@T val = initval;
+
+	@Integer i = 0;
+	while (i < t::size) {
+		val = $(operation val $(t:get i));
+		i = i::inc;
+	}
+	return val;
+]

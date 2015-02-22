@@ -1,0 +1,25 @@
+
+/** BOOLEAN INTERFACE **/
+
+interface @Boolean {
+
+	/* Boolean arithmetic */
+	@Boolean and(@Boolean i) alias and; @Boolean operator&&(@Boolean b) alias @Boolean.and; @Boolean operator and(@Boolean b) alias @Boolean.and;
+	@Boolean or(@Boolean i) alias or;   @Boolean operator||(@Boolean b) alias @Boolean.or;  @Boolean operator or(@Boolean b) alias @Boolean.or;
+	@Boolean xor(@Boolean i) alias xor; @Boolean operator^^(@Boolean b) alias @Boolean.xor; @Boolean operator xor(@Boolean b) alias @Boolean.xor;
+	@Boolean not alias !; @Boolean n alias @Boolean.not;
+	
+	/* Conditional methods */
+	
+	#info("Calls closure if true
+		@param closure the closure")
+	@Void operator ifTrue(@Closure<@Void> closure) [
+		if (this) closure();
+	]
+	
+	#info("Calls closure if false
+		@param closure the closure")
+	@Void operator ifFalse(@Closure<@Void> closure) [
+		if (this); else closure();
+	]
+};

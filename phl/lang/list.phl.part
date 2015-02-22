@@ -1,0 +1,35 @@
+
+/**** LIST INTERFACE ****/
+
+interface @List<@T> data @Pointer<@T> {
+
+	/* Get and set */
+	@T get(@Integer index) alias get;
+	@Void set(@Integer index, @T value) #modifies_this alias set;
+	
+	/* Operators */
+	@T operator[](@Integer index) alias @List.get;
+	@Void operator[]=(@Integer index, @T value) #modifies_this alias @List.set;
+	
+	/* Size */
+	@Integer size [
+		return @Integer get(this,0);
+	]
+	
+	/* Type conversions */
+	
+	#warn(CRITICAL_ONLY)
+	@String str [
+		@String s = "[";
+	
+		@Integer i = 0;
+		while (i < this::size) {
+			if (i!=0) s = s + ", ";
+			s = s + (@Integer @Any this.get(i+1))::str;
+			i = i::inc;
+		}
+		return s + "]";
+	]
+	
+	auto @String alias @List.str;
+};

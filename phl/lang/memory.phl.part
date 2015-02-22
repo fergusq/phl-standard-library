@@ -1,0 +1,63 @@
+
+/**** MEMORY MANAGEMENT ****/
+
+/** External functions **/
+
+expect @ExternalFunction			get;
+expect @ExternalFunction			set;
+expect @Integer					osize;
+extern 						GC_malloc;
+expect @Function<@Pointer, @Integer>		GC_malloc;
+extern 						GC_realloc;
+expect @Function<@Pointer, @Pointer, @Integer>	GC_realloc;
+
+/** Pointer interface **/
+
+interface @Pointer<@T> data @Integer {
+
+	/* Get and set functions */
+	#warn(CRITICAL_ONLY)
+	@T get alias __at1__;
+	#warn(CRITICAL_ONLY)
+	@T set (@T value) #modifies_this alias __at2__;
+	
+	/* Operator aliases */
+	@T operator~=(@T v) #modifies_this alias @Pointer.set;
+	@T operator~() alias @Pointer.get;
+	
+	@T operator[](@Integer i) alias get;
+	@T operator[]=(@Integer i, @T v) #modifies_this alias set;
+};
+
+/** Allocation function **/
+
+#info("Allocates memory
+	@param size the size in bytes
+	@returns a pointer to the allocated memory")
+@Pointer alloc(@Integer size) [
+	return @Pointer GC_malloc(size);
+]
+
+#info("Reallocates memory
+	@param pointer the original pointer
+	@param size the size in bytes
+	@returns a pointer to the reallocated memory")
+@Pointer realloc(@Pointer pointer, @Integer size) [
+	return @Pointer GC_realloc(pointer, size);
+]
+
+/** Reference function **/
+
+#deprecated("This function is under construction and not safe to use.")
+#info("Creates a reference to a <b>variable</b>. If the parameter is not a variable,
+	returns a pointer to a random location in the stack
+	@param obj the <b>variable</b>
+	@returns a reference to the variable")
+<@T> @Pointer<@T> ref(@T obj) alias and;
+
+/** Pointer size **/
+
+@Integer ptr_size [
+	return osize;
+]
+

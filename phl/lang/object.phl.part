@@ -1,0 +1,50 @@
+
+/**** OBJECT STRUCTURE ****/
+
+struct @Object : @Any {
+	field @String type {
+		get:getType,
+		set:setType
+	};
+	
+	new []
+	
+	@Object initObject [
+		return this;
+	]
+	
+	#info("Checks if two objects are the same object (they reference to the same location). Does NOT check that they are equal.
+		@see equals")
+	@Boolean operator==(@Object obj) alias ==;
+	#info("Checks if two objects are not the same object (they don't reference to the same location).")
+	@Boolean operator!=(@Object obj) alias !=;
+	
+	auto @String #warn(CRITICAL_ONLY) [
+		return this.getType() + "@" + @Integer (@Any this);
+	]
+};
+
+/**** NULL CHECK PROCEDURE ****/
+
+/** External functions **/
+
+extern exit;
+extern fprintf;
+extern stderr;
+
+/** Error output function **/
+
+@Void err_println(@String str) [
+	fprintf(stderr, "%s\n", str);
+]
+
+/** nullPtrCheck function **/
+
+#info("Prints a warning if an object is null @param obj the object")
+@Void nullPtrCheck(@Object obj) [
+	if (null == obj) {
+		err_println("nullPtrCheck(): NullPtrException\n");
+		doc exit(1);
+	}
+	return void;
+]

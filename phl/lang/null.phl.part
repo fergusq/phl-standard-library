@@ -1,0 +1,7 @@
+
+/**** NULL INTERFACE ****/
+
+interface @Null {
+	@Boolean operator==(@Any obj) alias ==;
+	@Boolean operator!=(@Any obj) alias !=;
+};

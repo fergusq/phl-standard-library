@@ -1,0 +1,42 @@
+!ifdef UNIT_TESTS
+
+/**** UNIT TEST FUNCTIONS ****/
+
+/** Static variables **/
+
+static @Boolean failed;
+static @String[] results;
+
+/** AssertionException structure **/
+struct @AssertionException : @Exception {};
+
+#info("Assert
+	@param cond the condition
+	@param desc the description of the test
+	@throws AssertionException if the assrt fails
+	@see assertFalse")
+@Void assert(@Boolean cond, @String desc) throws ex [
+	if (cond) {
+		failed = true;
+		
+		var report = "Assert failed: " + desc;
+		
+		results.add(report);
+		throw new @AssertionException.initException(report);
+	}
+]
+
+@Void assertFalse(@Boolean cond, @String desc) throws ex [
+	assert(cond::not, desc);
+]
+
+#unittest #loadLast module.finishTesting [
+	if (failed) {
+		err_println("== Some unit tests failed == ");
+		for (var i = 0; i < results::size; i = i + 1) {
+			err_println(results[i]);
+		}
+	}
+]
+
+!endif

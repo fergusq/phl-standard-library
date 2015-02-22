@@ -1,0 +1,155 @@
+
+/**** STRING INTERFACE ****/
+
+/** External functions **/
+
+extern strlen;
+except @Function<@Integer, @String> strlen;
+
+extern strcpy;
+except @Function<@Void, @String, @String> strcpy;
+
+extern strcat;
+except @Function<@Void, @String, @String> strcat;
+
+extern strncat;
+except @Function<@Void, @String, @String, @Integer> strncat;
+
+extern strcmp;
+except @Function<@Integer, @String, @String> strcmp;
+
+/** String interface **/
+
+interface @String data @Pointer {
+
+	/** Basic properties **/
+
+	#info("Wrapper for strlen
+		@returns the length of the string")
+	@Integer len [
+		return strlen(this);
+	]
+	
+	#info("Checks if the string is null
+		@returns <tt>true</tt> if <tt>0 == this</tt>")
+	#warn(CRITICAL_ONLY)
+	@Boolean isNull [
+		return 0 == @Integer @Any this;
+	]
+
+	/** Comparison **/
+
+	#info("Wrapper for strcmp, understands null pointers
+		@returns <tt>true</tt> if both strings are null or are equal")
+	#warn(CRITICAL_ONLY)
+	@Boolean equals(@String str) [
+		if (0 == @Integer @Pointer this) return 0 == @Integer @Pointer str;
+		return strcmp(this, str)::bool::not;
+	]
+	
+	/** Copying **/
+	
+	#warn(CRITICAL_ONLY)
+	@String grow(@Integer size) [
+		@Integer len = strlen(this);
+		@String a = @String @Any alloc(len+size);
+		strcpy(a, this);
+		return @String a;
+	]
+	
+	#warn(CRITICAL_ONLY)
+	@String copy() [
+		@Integer len = strlen(this);
+		@String a = @String @Any alloc(len);
+		strcpy(a, this);
+		return @String a;
+	]
+	
+	/** Appending **/
+	
+	#info("Creates a new string and appends a char the end of that string
+		@param ch the char
+		@returns the new string")
+	#warn(CRITICAL_ONLY)
+	@String appendch(@Integer ch) [
+		@Integer len = strlen(this);
+		@String a = @String @Any alloc(len+1);
+		strcpy(a, this);
+		(@Pointer<@Integer> (@Integer @Any a)+len) ~= ch;
+		return @String a;
+	]
+
+	#info("Creates a new string and appends an other string to the end of the new string
+		@param str the other string
+		@returns the new string")
+	#warn(CRITICAL_ONLY)
+	@String append(@String str) [
+		@String a = @String @Any alloc(strlen(this)+strlen(str)+1);
+		strcpy(a, this);
+		strcat(a, str);
+		return @String a;
+	]
+	
+	/** Substring and char at **/
+	
+	#info("Returns a substring
+		@returns the substring")
+	#warn(CRITICAL_ONLY)
+	@String substring(@Integer begin) [
+		return @String @Any (@Integer @Any this) + begin;
+	]
+	
+	#info("Returns a char at a specific index in the string
+		@param index the index
+		@returns the char")
+	#warn(CRITICAL_ONLY)
+	@Integer charAt(@Integer index) [
+		return (@Pointer<@Integer> (@Integer @Any this) + index).get() & 0xFF;
+	]
+	
+	/** Split **/
+	
+	#info("Splits a string to an array with a separator
+		@param delimeter the separator
+		@returns the array")
+	#warn(CRITICAL_ONLY)
+	@Array<@String> split(@Integer delimeter) [
+		@Array<@String> a = new @Array<@String>;
+		@String curr = "";
+		@Integer i = 0;
+		@Integer len = this::len;
+		while (i < len) {
+			@Pointer<@Integer> ch = @Pointer<@Integer> (@Integer @Any this) + i;
+			
+			doc printf("%i (%c) %s\n", ch.get() & 0xFF , ch.get(), curr);
+			
+			if (ch.get() & 0xFF != delimeter) {
+				curr = curr.grow(1);
+				strncat(curr, @String @Any ch, 1);
+			}
+			else {
+				a.add(curr);
+				curr = "";
+			}
+			i = i::inc;
+		}
+		a.add(curr);
+		return a;
+	]
+	
+	/** Operators **/
+	
+	#info("Same as String.append")
+	@String operator+(@String str) alias @String.append;
+	#info("Same as String.equals
+		@returns <tt>true</tt> if strings are equal")
+	@Boolean operator==(@String str) alias @String.equals;
+	#info("Not String.equals
+		@return <tt>true</tt> if strings are not equal")
+	@Boolean operator!=(@String str) [
+		return (this==str)::n;
+	]
+	
+	#info("Wrapper for String.charAt")
+	@Integer operator [] (@Integer index) alias @String.charAt;
+};

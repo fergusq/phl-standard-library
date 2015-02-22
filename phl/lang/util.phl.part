@@ -1,0 +1,15 @@
+
+/**** UTILITY FUNCTIONS ****/
+
+#info("
+	Inline If
+
+	@param cond the condition
+	@param then then-part
+	@param otherwise else-part
+	@returns the then-part if the condition is <tt>true</tt>, else the else part
+")
+<@T> @T iif(@Boolean cond, @T then, @T otherwise) [
+	if (cond) return then;
+	else return otherwise;
+]

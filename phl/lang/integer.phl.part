@@ -1,0 +1,137 @@
+
+/**** INTEGER INTERFACE ****/
+
+extern sprintf;
+
+interface @Integer {
+	
+	/** Private methods **/
+	
+	/* Integer -> Boolean */
+	#warn(CRITICAL_ONLY)
+	#private
+	@Boolean bool [
+		return @Boolean @Any this;
+	]
+	
+	/* Binary arithmetic */
+	#private @Integer andb(@Integer i) alias and;	#private @Integer operator&(@Integer i) alias @Integer.andb;
+	#private @Integer orb(@Integer i) alias or;	#private @Integer operator|(@Integer i) alias @Integer.orb;
+	#private @Integer xorb(@Integer i) alias xor;	#private @Integer operator^(@Integer i) alias @Integer.xorb;
+
+	/** Public methods **/
+
+	/* Arithmetic methods */
+	@Integer add(@Integer i) alias +; @Integer operator+(@Integer i) alias @Integer.add;
+	@Integer sub(@Integer i) alias -; @Integer operator-(@Integer i) alias @Integer.sub;
+	@Integer mul(@Integer i) alias *; @Integer operator*(@Integer i) alias @Integer.mul;
+	@Integer div(@Integer i) alias /; @Integer operator/(@Integer i) alias @Integer.div;
+	@Integer mod(@Integer i) alias %; @Integer operator%(@Integer i) alias @Integer.mod;
+	
+	#info("A very basic power function.
+		@param i exponent
+		@returns <tt>this</tt><sup><tt>i</tt></sup>")
+	@Integer exp(@Integer i) [
+		if (i == 0) return 1;
+	
+		@Integer t = this;
+	
+		@Integer j = 0;
+		while (j < i) {
+			this = this * t;
+		
+			j = j + 1;
+		}
+		return this;
+	]
+	
+	#info("Same as Integer.exp
+		@param i exponent
+		@returns <tt>this</tt><sup><tt>i</tt></sup>")
+	@Integer operator**(@Integer i) alias @Integer.exp;
+
+	#info("Same as <tt>-(this)</tt> or <tt>0-this</tt>.
+		@returns <tt>-this</tt>")
+	@Integer neg [
+		return $(-0 this);
+	]
+
+	#info("Same as <tt>-(this)</tt> or <tt>0-this</tt>.
+		@returns <tt>-this</tt>")
+	@Integer n alias @Integer.neg;
+
+	#info("Increment by one
+		@returns <tt>this+1</tt>")
+	@Integer inc [
+		return this + 1;
+	]
+	
+	#info("Decrement by one
+		@returns <tt>this-1</tt>")
+	@Integer dec [
+		return this - 1;
+	]
+
+	/* Comparison methods */
+	@Boolean eq(@Integer i) alias ==;  @Boolean operator==(@Integer i) alias @Integer.eq;
+	@Boolean neq(@Integer i) alias !=; @Boolean operator!=(@Integer i) alias @Integer.neq;
+	@Boolean lt(@Integer i) alias <;   @Boolean operator<(@Integer i) alias @Integer.lt;
+	@Boolean le(@Integer i) alias <=;  @Boolean operator<=(@Integer i) alias @Integer.le;
+	@Boolean gt(@Integer i) alias >;   @Boolean operator>(@Integer i) alias @Integer.gt;
+	@Boolean ge(@Integer i) alias >=;  @Boolean operator>=(@Integer i) alias @Integer.ge;
+	
+	/* Utility methods */
+	
+	#info("Creates a new array which contains all elements in a specific range. For example
+			<tt>(3..7)</tt> returns array <tt>[3, 4, 5, 6, 7]</tt>.
+			@param i the end of the range
+			@returns a range {<tt>this</tt>, <tt>this+1</tt>, <tt>this+2</tt>, ..., <tt>i</tt>}")
+	#warn(CRITICAL_ONLY)
+	@Array<@Integer> operator..(@Integer i) [
+		if (i<this) return null;
+
+		@List<@Integer> l = @List<@Integer> @Any alloc(ptr_size()*(i-this+2));
+		l.set(0, i-this+1);
+	
+		@Integer j = this;
+		@Integer k = 1;
+		while (j <= i) {
+			l.set(k, j);
+		
+			j = j::inc;
+			k = k::inc;
+		}
+		var arr = new @Array<@Integer>;
+		arr.setData(l);
+		return arr;
+	]
+	
+		
+	/* Loop methods */
+	
+	@Void operator times (@Closure<@IteratorControl> job) [
+		for (var i = 0; i < this; i=i+1) if (job().isBreak()) break;
+	]
+	
+	#info("Iterates throught numbers 0..this-1")
+	@Void operator iterate (@Closure<@IteratorControl, @Integer> job) [
+		for (var i = 0; i < this; i=i+1) if (job(i).isBreak()) break;
+	]
+	
+	#info("Iterates throught numbers this-1..0")
+	@Void operator iteratebw (@Closure<@IteratorControl, @Integer> job) [
+		for (var i = this-1; i >= 0; i=i-1) if (job(i).isBreak()) break;
+	]
+	
+	/* Type conversion methods */
+	
+	#warn(CRITICAL_ONLY)
+	@String str [
+		@String s = @String @Any alloc(16);
+		sprintf(s, "%i\0", this);
+		doc printf("%i\n", this);
+		return s;
+	]
+	
+	auto @String #warn(CRITICAL_ONLY) alias @Integer.str;
+};
