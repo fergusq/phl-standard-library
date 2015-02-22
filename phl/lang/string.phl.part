@@ -153,3 +153,17 @@ interface @String data @Pointer {
 	#info("Wrapper for String.charAt")
 	@Integer operator [] (@Integer index) alias @String.charAt;
 };
+
+/*** String unit tests ***/
+
+#unittest module.testSplit [
+	try {
+		@String text = "a;b;cdef";
+		@String[] splittedString = text.split(';');
+		assert(splittedString[0] == "a"
+			&& splittedString[1] == "b"
+			&& splittedString[2] == "cdef" 
+			&& splittedString::size == 3, "Splitted string does not equal to {a,b,cdef}.");
+	} catch (ex);
+]
+
