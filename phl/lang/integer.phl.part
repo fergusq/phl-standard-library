@@ -16,7 +16,7 @@ interface @Integer {
 	
 	/* Binary arithmetic */
 	#private @Integer andb(@Integer i) alias and;	#private @Integer operator&(@Integer i) alias @Integer.andb;
-	#private @Integer orb(@Integer i) alias or;	#private @Integer operator|(@Integer i) alias @Integer.orb;
+	#private @Integer orb(@Integer i) alias or;	/* #private @Integer operator|(@Integer i) alias @Integer.orb; */
 	#private @Integer xorb(@Integer i) alias xor;	#private @Integer operator^(@Integer i) alias @Integer.xorb;
 
 	/** Public methods **/
@@ -80,6 +80,12 @@ interface @Integer {
 	@Boolean gt(@Integer i) alias >;   @Boolean operator>(@Integer i) alias @Integer.gt;
 	@Boolean ge(@Integer i) alias >=;  @Boolean operator>=(@Integer i) alias @Integer.ge;
 	
+	@Boolean divides(@Integer i) [
+		return i % this == 0;
+	]
+	
+	@Boolean operator |(@Integer i) alias @Integer.divides;
+	
 	/* Utility methods */
 	
 	#info("Creates a new array which contains all elements in a specific range. For example
@@ -129,9 +135,32 @@ interface @Integer {
 	@String str [
 		@String s = @String @Any alloc(16);
 		sprintf(s, "%i\0", this);
-		doc printf("%i\n", this);
 		return s;
 	]
 	
 	auto @String #warn(CRITICAL_ONLY) alias @Integer.str;
 };
+
+!ifdef UNIT_TESTS
+
+#unittest module.testIntegerTimes [
+	var counter = 0;
+	5 times [ counter = counter + 1; ];
+	assert(counter == 5, "testIntegerTimes: 5");
+	
+	counter = 0;
+	10000 times [
+		counter = counter + 1;
+		if (counter == 4000) return BREAK();
+		return CONTINUE();
+	];
+	assert(counter == 4000, "testIntegerTimes: 4000");
+]
+
+#unittest module.testIntegerDivides [
+	assert(5|10, "testIntegerDivides: 5|10");
+	assert(2|6, "testIntegerDivides: 2|6");
+	assertFalse(4|6, "testIntegerDivides: 4|6");
+]
+
+!endif

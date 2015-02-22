@@ -11,7 +11,7 @@ extern printf;
 static @Boolean failed;
 static @String[] results;
 
-#info("Assert
+#info("Assert to be used in unit tests
 	@param cond the condition
 	@param desc the description of the test
 	@see assertFalse")
