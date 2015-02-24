@@ -1,0 +1,64 @@
+module phl::lang::algin;
+
+extern printf;
+extern scanf;
+extern gets;
+extern putchar;
+
+interface @IO {
+	#info("
+		Prints the given text to the standard output via standard C <tt>printf</tt>.
+		@param text The text to be printed
+		@returns this
+	")
+	@IO operator << (@String text) [
+		printf("%s", text);
+		return this;
+	]
+
+	#info("
+		Reads a token from the standard input and stores it to the memory using the pointer given.
+		
+		Currently supports only String and Integer pointers. Uses following codes to read the input:
+		<table>
+		<tr><th>Type</th><th>Code</th></tr>
+		<tr><th>String</th><td><tt>ptr ~= gets();</tt></th></tr>
+		<tr><th>Integer</th><td><tt>scanf(\"%i\", ptr);</tt></th></tr>
+		</table>
+		
+		@param ptr The pointer used to store the input
+		@returns this
+		@see IO.next
+	")
+	template<@T> @IO operator >> (@T~ ptr) [
+		static if __equals_type(@T, @Integer) {
+			scanf("%i", ptr);
+		} else static if __equals_type(@T, @String) {
+			ptr ~= gets();
+		} else {
+			static __error("Not supported!");
+		}
+		return this;
+	]
+	
+	#info("
+		A wrapper for <tt>IO.operator &gt;&gt;</tt>. Creates a pointer, reads input and stores it to the memory and then dereferences and returns the input.
+		@returns The token read
+		@see IO.operator &gt;&gt;
+	")
+	template<@T> @T next #warn(CRITICAL) [
+		@T~ p = {0};
+		this >> p;
+		return p~;
+	]
+
+	@Integer nextInt [
+		return this.next();
+	]
+	
+	@String nextString [
+		return this.next();
+	]
+};
+
+static @IO io;
