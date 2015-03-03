@@ -1,0 +1,20 @@
+module phl::util::random;
+
+/**** EXTERNAL FUNCTIONS ****/
+
+extern rand;
+expect @Function<@Integer> rand;
+extern srand;
+expect @Function<@Void, @Time> srand;
+extern time;
+expect @Function<@Time, @Null> time;
+
+/**** RANDOMIZE ****/
+@Void randomize [
+	srand(time(null));
+]
+
+/**** RANDOM ****/
+@Integer rnd(@Integer alue) [
+	return rand() % alue;
+]

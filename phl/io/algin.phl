@@ -1,4 +1,4 @@
-module phl::lang::algin;
+module phl::io::algin;
 
 extern printf;
 extern scanf;
@@ -56,7 +56,7 @@ interface @IO {
 		return this.next();
 	]
 	
-	@String nextString [
+	@String nextLine [
 		return this.next();
 	]
 };
