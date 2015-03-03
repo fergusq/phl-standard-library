@@ -32,6 +32,7 @@ interface @Integer {
 		@param i exponent
 		@returns <tt>this</tt><sup><tt>i</tt></sup>")
 	@Integer exp(@Integer i) [
+		if (i < 0) return 1/this::neg.exp(i);
 		if (i == 0) return 1;
 	
 		@Integer t = this;

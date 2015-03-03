@@ -7,7 +7,7 @@ interface @Boolean {
 	@Boolean and(@Boolean i) alias and; @Boolean operator&&(@Boolean b) alias @Boolean.and; @Boolean operator and(@Boolean b) alias @Boolean.and;
 	@Boolean or(@Boolean i) alias or;   @Boolean operator||(@Boolean b) alias @Boolean.or;  @Boolean operator or(@Boolean b) alias @Boolean.or;
 	@Boolean xor(@Boolean i) alias xor; @Boolean operator^^(@Boolean b) alias @Boolean.xor; @Boolean operator xor(@Boolean b) alias @Boolean.xor;
-	@Boolean not alias !; @Boolean n alias @Boolean.not;
+	@Boolean not alias !; @Boolean n alias @Boolean.not; @Boolean operator~ alias @Boolean.not; 
 	
 	/* Conditional methods */
 	

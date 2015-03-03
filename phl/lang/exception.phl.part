@@ -1,13 +1,13 @@
 
 /**** EXCEPTION STRUCTURE ****/
 
-struct @Exception {	
+class @Exception {	
 	field @String message {
 		get:getMessage,
 		set:setMessage
 	};
 	
-	@Exception initException(@String message) [
+	@Exception initException(@String message) #final #nonvirtual [
 		this.setMessage(message);
 		return this;
 	]

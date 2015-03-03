@@ -3,14 +3,14 @@
 
 /** Enumerator structure **/
 
-struct @Enumerator<@T> {
+class @Enumerator<@T> #final {
 	field @T[] items;
 	
 	#info("Initializes a new enumerator
 		@param items emumerated items
 		@returns this
 		@since PHL 1.2.5")
-	@Enumerator<@T> init(@T[] items) [
+	@Enumerator<@T> init(@T[] items) #nonvirtual #final [
 		this::items = items;
 		return this;
 	]
@@ -18,7 +18,7 @@ struct @Enumerator<@T> {
 	#info("Enumerates over the items
 		@param task calls task for each item
 		@since PHL 1.2.5")
-	@Void operator each(@Closure<@IteratorControl, @T> task) [
+	@Void operator each(@Closure<@IteratorControl, @T> task) #nonvirtual #final [
 		@Integer i = 0;
 		while (i < this::items::size) {
 			if (task(this::items[i]).isBreak()) break;
@@ -29,7 +29,7 @@ struct @Enumerator<@T> {
 	#info("Enumerates over the items
 		@param job calls task for each item and index
 		@since PHL 1.2.5")
-	@Void operator enumerate (@Closure<@IteratorControl, @Integer, @T> job) [
+	@Void operator enumerate (@Closure<@IteratorControl, @Integer, @T> job) #nonvirtual #final [
 		for (var i = 0; i < this::items::size; i=i+1) if(job(i, this::items[i]).isBreak()) break;
 	]
 };
@@ -114,7 +114,7 @@ class @ArrayKeyValueStream<@T> : @KeyValueStream<@Integer, @T> {
 */
 /** Array structure **/
 
-struct @Array<@T> {
+class @Array<@T> #final {
 
 	/** Fields **/
 
@@ -136,7 +136,7 @@ struct @Array<@T> {
 		@returns this")
 	#warn(NORMAL)
 	#modifies_this
-	@Array<@T> alloc(@Integer size) [
+	@Array<@T> alloc(@Integer size) #final #nonvirtual [
 		@List<@Any> l = @List<@Any> GC_malloc(ptr_size()+ptr_size()*size);
 		$(l:set 0 size);
 		$(this:setData @List<@T> l);
@@ -148,7 +148,7 @@ struct @Array<@T> {
 		@returns this")
 	#warn(NORMAL)
 	#modifies_this
-	@Array<@T> init(@Integer size) [
+	@Array<@T> init(@Integer size) #final #nonvirtual [
 	
 		size = $(-size this::size);
 	
@@ -165,7 +165,7 @@ struct @Array<@T> {
 
 	#info("The size of the array
 		@returns the size of the array")
-	@Integer size [
+	@Integer size #final #nonvirtual [
 		return @Integer $(get this::list 0);
 	]
 	
@@ -175,7 +175,7 @@ struct @Array<@T> {
 		@param index the index of the element
 		@returns the element")
 	#warn(NORMAL)
-	@T get(@Integer index) [
+	@T get(@Integer index) #final #nonvirtual [
 		index = $(+index 1);
 		if ($(<=index 0)) return null;
 		if ($(>index this::size)) return null;
@@ -185,7 +185,7 @@ struct @Array<@T> {
 	#info("Get an element from the array - no bounds checking.
 		@param index the index of the element
 		@returns the element")
-	@T operator [] (@Integer index) [
+	@T operator [] (@Integer index) #final #nonvirtual [
 		return $(this::list:get $(+index 1));
 	]
 	
@@ -195,7 +195,7 @@ struct @Array<@T> {
 		@param index the index of the element
 		@param value the element")
 	#modifies_this
-	@Void set(@Integer index, @T value) [
+	@Void set(@Integer index, @T value) #final #nonvirtual [
 		index = $(+index 1);
 		if ($(<=index 0)) return void;
 		if ($(>index this::size)) return void;
@@ -206,7 +206,7 @@ struct @Array<@T> {
 		@param index the index of the element
 		@param value the element")
 	#modifies_this
-	@Void operator []= (@Integer index, @T value) [
+	@Void operator []= (@Integer index, @T value) #final #nonvirtual [
 		$(this::list:set $(+index 1) value);
 	]
 
@@ -214,7 +214,7 @@ struct @Array<@T> {
 
 	#info("Returns the last element of the array
 		@returns what above says")
-	@T last [
+	@T last #final #nonvirtual [
 		return this.get(size()-1);
 	]
 
@@ -226,7 +226,7 @@ struct @Array<@T> {
 		@see Array.addAll
 		@see Array.insert")
 	#modifies_this
-	@Array<@T> add(@T value) [
+	@Array<@T> add(@T value) #final #nonvirtual [
 		@Integer oldsize = this::size;
 		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize + 2) * ptr_size()));
 		$(set l 0 $(+oldsize 1));
@@ -239,7 +239,7 @@ struct @Array<@T> {
 		@param array the array
 		@returns this")
 	#modifies_this
-	@Array<@T> addAll(@Array<@T> array) [
+	@Array<@T> addAll(@Array<@T> array) #final #nonvirtual [
 		@Integer oldsize = this::size;
 		@List<@Any> l = @List<@Any> GC_realloc(@Pointer<@T> this::list, ((oldsize + 1 + array::size) * ptr_size()));
 		$(set l 0 $(+oldsize array::size));
@@ -256,7 +256,7 @@ struct @Array<@T> {
 		@param index the index of the element; negative index is subtracted from the size
 		@returns the element")
 	#modifies_this
-	@T remove(@Integer index) [
+	@T remove(@Integer index) #final #nonvirtual [
 		
 		if (index < 0) index = this::size + index;
 		
@@ -287,7 +287,7 @@ struct @Array<@T> {
 		@see Array.add
 		@see Array.set")
 	#modifies_this
-	@Void insert(@Integer index, @T data_) [
+	@Void insert(@Integer index, @T data_) #final #nonvirtual [
 		
 		if (index < 0) index = this::size + index;
 		
@@ -316,7 +316,7 @@ struct @Array<@T> {
 		@see Array.set
 		@see Array.insert")
 	#modifies_this
-	@Void insertAll(@Integer index, @T[] array) [
+	@Void insertAll(@Integer index, @T[] array) #final #nonvirtual [
 		if (index < 0) index = this::size + index;
 		
 		index = index + 1;
@@ -345,7 +345,7 @@ struct @Array<@T> {
 	#info("Create a new array which contains all elements that apply to a specific condition.
 		@param filter the filter
 		@returns the new array")
-	@Array<@T> filter(@Closure<@Boolean, @T> filter) [
+	template @Array<@T> filter(@Closure<@Boolean, @T> filter) #final #nonvirtual [
 		@Array<@T> filtered = new @Array<@T>;
 
 		@Integer i = 0;
@@ -358,16 +358,34 @@ struct @Array<@T> {
 	
 	/* Collect and inject */
 	
-	#info("Creates a new array and applies an operation to all elements (also called map)
+	#info("Creates a new array and applies an operation to all elements
 		@param operation the operation
 		@returns the new array")
-	<@U> @Array<@U> collect(@Closure<@U, @T> operation) alias array_collect_;
+	template <@U> @Array<@U> map(@Closure<@U, @T> operation) #final #nonvirtual [
+		@Array<@U> arr = new @Array<@U>;
+
+		@Integer i = 0;
+		while (i < this::size) {
+			$(arr:add $(operation $(this:get i)));
+			i = i::inc;
+		}
+		return arr;
+	]
 	
 	#info("Reduces the array
 		@param initval initial value
 		@param operation the operation
 		@returns the new value")
-	<@U> @U inject(@U initval, @Closure<@U, @U, @T> operation) alias array_inject_;
+	<@U> @U reduce(@U initval, @Closure<@U, @U, @T> operation) #final #nonvirtual [
+		@U val = initval;
+
+		@Integer i = 0;
+		while (i < this::size) {
+			val = $(operation val $(this:get i));
+			i = i::inc;
+		}
+		return val;
+	]
 	
 	/* Sort */
 	
@@ -375,7 +393,7 @@ struct @Array<@T> {
 		@see Array.bsort
 		@see Array.bsortc")
 	#modifies_this
-	template @Array<@T> sort [
+	template @Array<@T> sort #final #nonvirtual [
 		return this.bsort();
 	]
 	
@@ -384,7 +402,7 @@ struct @Array<@T> {
 		@see Array.sort")
 	#modifies_this
 	#warn(CRITICAL_ONLY)
-	template @Array<@T> bsort [
+	template @Array<@T> bsort #final #nonvirtual [
 		var n = @Integer @Any this::list[0];
 		do {
 		var newn = 0;
@@ -407,7 +425,7 @@ struct @Array<@T> {
 		@see Array.sort")
 	#modifies_this
 	#warn(CRITICAL_ONLY)
-	@Array<@T> bsortc(@Closure<@Integer, @T, @T> comparator) [
+	@Array<@T> bsortc(@Closure<@Integer, @T, @T> comparator) #final #nonvirtual [
 		var n = @Integer @Any this::list[0];
 		do {
 			var newn = 0;
@@ -426,7 +444,7 @@ struct @Array<@T> {
 	
 	/** Loop methods **/
 	
-	@Void forEach(@Closure<@IteratorControl, @T> task) [
+	@Void forEach(@Closure<@IteratorControl, @T> task) #final #nonvirtual [
 		@Integer i = 0;
 		while (i < this::size) {
 			if (task(this.get(i)).isBreak()) break;
@@ -434,7 +452,7 @@ struct @Array<@T> {
 		}
 	]
 	
-	@Void operator each(@Closure<@IteratorControl, @T> task) [
+	@Void operator each(@Closure<@IteratorControl, @T> task) #final #nonvirtual [
 		@Integer i = 0;
 		while (i < this::size) {
 			if (task(this.get(i)).isBreak()) break;
@@ -442,15 +460,37 @@ struct @Array<@T> {
 		}
 	]
 	
-	@Void iterate (@Closure<@IteratorControl, @Integer, @T> job) [
+	@Void iterate (@Closure<@IteratorControl, @Integer, @T> job) #final #nonvirtual [
 		for (var i = 0; i < this::size; i=i+1) if(job(i, this[i]).isBreak()) break;
 	]
-	@Void operator iterate (@Closure<@IteratorControl, @Integer, @T> job) [
+	@Void operator iterate (@Closure<@IteratorControl, @Integer, @T> job) #final #nonvirtual [
 		for (var i = 0; i < this::size; i=i+1) if(job(i, this[i]).isBreak()) break;
 	]
 	
-	@Enumerator<@T> enumerator [
+	@Enumerator<@T> enumerator #final #nonvirtual [
 		return new @Enumerator<@T>.init(this);
+	]
+	
+	/** Comparison **/
+	
+	#info("Compares all elements of both arrays with operator ==.
+		Returns true if and only if ther have the same size and every element this[i] == other[i].
+		@param other The array to compare with
+		@returns true if arrays are equal, otherwise false")
+	template @Boolean operator == (@Array<@T> other) [
+		if (this::size != other::size) return false;
+		
+		for (var i = 0; i < this::size; i = i + 1)
+			if (this[i] != other[i]) return false;
+		
+		return true;
+	]
+	
+	#info("Calls operator == and returns the opposite.
+		@param other The array to compare with
+		@returns true if arrays are not equal, otherwise false")
+	template @Boolean operator != (@Array<@T> other) [
+		return (this == other)::not;
 	]
 	
 	/** Contains **/
@@ -458,7 +498,7 @@ struct @Array<@T> {
 	#info("Searches for a value from the array
 		@param val the value
 		@returns <tt>true</tt> if the array contains the value, otherwise <tt>false</tt>. Uses <tt>operator ==</tt> to compare elements")
-	template @Boolean contains(@T val) [
+	template @Boolean contains(@T val) #final #nonvirtual [
 		@Integer i = 0;
 		var size = this::size;
 		while (i < size) {
@@ -473,7 +513,7 @@ struct @Array<@T> {
 	#info("Creates a new array which contains all elements of the current array and a new element
 		@param value the new element
 		@returns the new array")
-	@Array<@T> operator..(@T value) [
+	template @Array<@T> operator..(@T value) #final #nonvirtual [
 		@Array<@T> arr = new @Array<@T>.init(this::size+1);
 
 		@Integer i = 0;
@@ -487,7 +527,7 @@ struct @Array<@T> {
 	
 	/** Type conversions **/
 	
-	template @String str [
+	template @String str #final #nonvirtual [
 		
 		@String s = "[";
 	
@@ -513,29 +553,8 @@ struct @Array<@T> {
 		return s + "]";
 	]
 	
-	auto @List #warn(CRITICAL_ONLY) [
+	auto @List #warn(CRITICAL_ONLY) #final #nonvirtual [
 		return @List @Any this.list();
 	]
 };
 
-<@T, @U> @Array<@T> array_collect_(@Array<@U> t, @Closure<@T, @U> operation) [
-	@Array<@T> arr = new @Array<@T>;
-
-	@Integer i = 0;
-	while (i < t::size) {
-		$(arr:add $(operation $(t:get i)));
-		i = i::inc;
-	}
-	return arr;
-]
-
-<@T, @U> @T array_inject_(@Array<@U> t, @T initval, @Closure<@T, @T, @U> operation) [
-	@T val = initval;
-
-	@Integer i = 0;
-	while (i < t::size) {
-		val = $(operation val $(t:get i));
-		i = i::inc;
-	}
-	return val;
-]

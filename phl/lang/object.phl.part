@@ -1,7 +1,7 @@
 
 /**** OBJECT STRUCTURE ****/
 
-struct @Object : @Any {
+class @Object : @Any {
 	field @String type {
 		get:getType,
 		set:setType
@@ -9,15 +9,19 @@ struct @Object : @Any {
 	
 	new []
 	
-	@Object initObject [
+	@Object initObject #final #nonvirtual [
 		return this;
 	]
 	
 	#info("Checks if two objects are the same object (they reference to the same location). Does NOT check that they are equal.
 		@see equals")
-	@Boolean operator==(@Object obj) alias ==;
+	@Boolean operator==(@Object obj) [
+		return (@Integer @Any this) == (@Integer @Any obj);
+	]
 	#info("Checks if two objects are not the same object (they don't reference to the same location).")
-	@Boolean operator!=(@Object obj) alias !=;
+	@Boolean operator!=(@Object obj) [
+		return (this == obj)::not;
+	]
 	
 	auto @String #warn(CRITICAL_ONLY) [
 		return this.getType() + "@" + @Integer (@Any this);
